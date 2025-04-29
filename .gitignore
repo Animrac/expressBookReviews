@@ -1,4 +1,6 @@
 # Distribution / packaging
-node_modules
-
-
+node_modules/
+.vs/
+.env
+.DS_Store
+*.log

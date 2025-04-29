@@ -10,8 +10,22 @@ app.use(express.json());
 
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
-app.use("/customer/auth/*", function auth(req,res,next){
-//Write the authenication mechanism here
+// middleware
+app.use("/customer/auth/*", function auth(req, res, next) {
+    //Write the authenication mechanism here to authenticate requests to /customer
+    if (req.session.authorization) {
+        let token = req.session.authorization['accessToken'];
+        jwt.verify(token, "access", (err, user) => {
+            if (!err) {
+                req.user = user;
+                next(); // go to the next middleware
+            } else {
+                return res.status(403).json({ message: "Customer could not be authenticated." })
+            }
+        })
+    } else {
+        return res.status(403).json({ message: "Customer is logged out." })
+    }
 });
  
 const PORT =5000;
@@ -20,3 +34,5 @@ app.use("/customer", customer_routes);
 app.use("/", genl_routes);
 
 app.listen(PORT,()=>console.log("Server is running"));
+
+//curl.exe http://localhost:5000/customer
